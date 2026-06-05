@@ -1,4 +1,3 @@
-# Trae la herramienta FastAPI para poder crear una API
 from fastapi import FastAPI, HTTPException
 
 # Trae BaseModel para definir cómo deben ser los datos 
@@ -21,19 +20,24 @@ class Product(BaseModel):
 def home():
     return {"message": "Hola Mundo!"}
 
-# Endpoint para obtener la lista de productos. Devuelve una lista de productos predefinidos
+# Endpoint para obtener la lista de productos, con opciones de filtrado por tipo y paginación
 @app.get("/products")
-def get_products(tipo: str | None = None):
+def get_products(
+    tipo: str | None = None,
+    skip: int = 0,
+    limit: int = 10
+):
     if tipo is None:
-         return products
-     
-    filtered_products = []
-    for p in products:
-        if p["tipo"] == tipo:
-            filtered_products.append(p)
-    
+         filtered = products
+    else:
+        filtered= []
+        for p in products:
+            if p["tipo"] == tipo:
+                filtered.append(p)
+        
     # Devuelve la lista de productos 
-    return filtered_products
+    paginated = filtered[skip: skip + limit]
+    return paginated
 
 # Endpoint para obtener un producto por su ID. 
 @app.get("/products/{product_id}")
