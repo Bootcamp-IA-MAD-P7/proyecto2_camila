@@ -23,10 +23,17 @@ def home():
 
 # Endpoint para obtener la lista de productos. Devuelve una lista de productos predefinidos
 @app.get("/products")
-def get_products():
+def get_products(tipo: str | None = None):
+    if tipo is None:
+         return products
+     
+    filtered_products = []
+    for p in products:
+        if p["tipo"] == tipo:
+            filtered_products.append(p)
     
     # Devuelve la lista de productos 
-    return products
+    return filtered_products
 
 # Endpoint para obtener un producto por su ID. 
 @app.get("/products/{product_id}")
@@ -42,7 +49,6 @@ def get_product(product_id: int):
 def create_product(product: Product):
         new_product =  {
             "id": len(products) + 1,
-            # dato que enviaste desde /docs
             "nombre": product.nombre,
             "tipo": product.tipo,
             "precio": product.precio
