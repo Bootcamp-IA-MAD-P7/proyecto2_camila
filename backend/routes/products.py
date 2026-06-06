@@ -1,0 +1,72 @@
+from fastapi import APIRouter, HTTPException
+from models.product import Product
+
+# grupo de rutas relacionadas con productos
+router = APIRouter()
+
+products = []
+
+# Endpoint para obtener la lista de productos, con opciones de filtrado por tipo y paginación
+@router.get("/products")
+def get_products(
+    tipo: str | None = None,
+    skip: int = 0,
+    limit: int = 10
+):
+    if tipo is None:
+         filtered = products
+    else:
+        filtered= []
+        for p in products:
+            if p["tipo"] == tipo:
+                filtered.append(p)
+        
+    # Devuelve la lista de productos 
+    paginated = filtered[skip: skip + limit]
+    return paginated
+# Endpoint para obtener un producto por su ID. 
+@router.get("/products/{product_id}")
+def get_product(product_id: int):
+    for p in products:
+        if p["id"] == product_id:
+            return p
+        
+    raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+# Endpoint para crear un nuevo producto
+@router.post("/products")
+def create_product(product: Product):
+        new_product =  {
+            "id": len(products) + 1,
+            "nombre": product.nombre,
+            "tipo": product.tipo,
+            "precio": product.precio
+        }
+        
+        # Guardar en lista  
+        products.append(new_product)
+        
+        # Devolver el nuevo producto creado
+        return new_product
+    
+# Endpoint para actualizar un producto existente
+@router.put("/products/{product_id}")
+def update_product(product_id: int, product: Product):
+    for p in products:
+        if p["id"] == product_id:
+            p["nombre"] = product.nombre
+            p["tipo"] = product.tipo
+            p["precio"] = product.precio
+            return p
+        
+    raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+# Endpoint para eliminar un producto por su ID
+@router.delete("/products/{product_id}")
+def delete_product(product_id: int):
+    for p in products:
+        if p["id"] == product_id:
+            products.remove(p)
+            return {"message": "Producto eliminado"}
+        
+    raise HTTPException(status_code=404, detail="Producto no encontrado")
